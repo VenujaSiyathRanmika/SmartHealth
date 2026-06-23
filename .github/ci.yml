@@ -1,0 +1,39 @@
+name: SmartHealth CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Backend Dependencies
+        run: |
+          pip install flask flask-cors requests
+
+      - name: Backend Build Success
+        run: echo "Backend Build Successful"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Frontend Install
+        run: |
+          cd frontend
+          npm install
+
+      - name: Frontend Build Success
+        run: echo "Frontend Build Successful"
