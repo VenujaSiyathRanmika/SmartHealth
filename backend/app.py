@@ -6,14 +6,26 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
+# ==========================================
+# OpenWeather API Key
+# ==========================================
+
+API_KEY = "00cdd19cb34018ea5995806d8bd10124"
+
+# ==========================================
 # Home Route
+# ==========================================
+
 @app.route("/")
 def home():
     return {
         "message": "SmartHealth API is running"
     }
 
+# ==========================================
 # Create Appointment
+# ==========================================
+
 @app.route("/appointments", methods=["POST"])
 def create_appointment():
 
@@ -35,19 +47,26 @@ def create_appointment():
     conn.commit()
     conn.close()
 
-    # Call Notification Microservice
-    requests.post(
-        "http://127.0.0.1:5001/send-notification",
-        json={
-            "patient_name": data["patient_name"]
-        }
-    )
+    # Notify Notification Service
+
+    try:
+        requests.post(
+            "http://notification-service:5001/send-notification",
+            json={
+                "patient_name": data["patient_name"]
+            }
+        )
+    except:
+        pass
 
     return {
         "message": "Appointment created successfully"
     }
 
+# ==========================================
 # View Appointments
+# ==========================================
+
 @app.route("/appointments", methods=["GET"])
 def get_appointments():
 
@@ -73,7 +92,10 @@ def get_appointments():
 
     return jsonify(appointments)
 
+# ==========================================
 # Queue Management
+# ==========================================
+
 @app.route("/queue", methods=["GET"])
 def queue():
 
@@ -104,6 +126,26 @@ def queue():
         position += 1
 
     return jsonify(queue_list)
+
+# ==========================================
+# Weather Service
+# ==========================================
+
+@app.route("/weather/<city>", methods=["GET"])
+def get_weather(city):
+
+    url = (
+        f"https://api.openweathermap.org/data/2.5/weather"
+        f"?q={city}&appid={API_KEY}&units=metric"
+    )
+
+    response = requests.get(url)
+
+    return jsonify(response.json())
+
+# ==========================================
+# Run App
+# ==========================================
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
