@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import "./App.css";
+
+const API_URL = "https://smarthealth-afm0.onrender.com";
 
 function App() {
   const [patientName, setPatientName] = useState("");
@@ -8,30 +11,38 @@ function App() {
   const [appointments, setAppointments] = useState([]);
 
   const loadAppointments = async () => {
-    const response = await axios.get(
-      "http://127.0.0.1:5000/appointments"
-    );
+    try {
+      const response = await axios.get(
+        `${API_URL}/appointments`
+      );
 
-    setAppointments(response.data);
+      setAppointments(response.data);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const createAppointment = async () => {
-    await axios.post(
-      "http://127.0.0.1:5000/appointments",
-      {
-        patient_name: patientName,
-        doctor_name: doctorName,
-        appointment_date: appointmentDate,
-      }
-    );
+    try {
+      await axios.post(
+        `${API_URL}/appointments`,
+        {
+          patient_name: patientName,
+          doctor_name: doctorName,
+          appointment_date: appointmentDate,
+        }
+      );
 
-    alert("Appointment Created!");
+      alert("Appointment Created!");
 
-    loadAppointments();
+      setPatientName("");
+      setDoctorName("");
+      setAppointmentDate("");
 
-    setPatientName("");
-    setDoctorName("");
-    setAppointmentDate("");
+      loadAppointments();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(() => {
@@ -39,10 +50,10 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: "30px", fontFamily: "Arial" }}>
-      <h1>🏥 SmartHealth</h1>
+    <div style={{ padding: "20px" }}>
+      <h1>SmartHealth</h1>
 
-      <h2>Book Appointment</h2>
+      <h2>Create Appointment</h2>
 
       <input
         type="text"
@@ -51,7 +62,8 @@ function App() {
         onChange={(e) => setPatientName(e.target.value)}
       />
 
-      <br /><br />
+      <br />
+      <br />
 
       <input
         type="text"
@@ -60,7 +72,8 @@ function App() {
         onChange={(e) => setDoctorName(e.target.value)}
       />
 
-      <br /><br />
+      <br />
+      <br />
 
       <input
         type="date"
@@ -68,10 +81,11 @@ function App() {
         onChange={(e) => setAppointmentDate(e.target.value)}
       />
 
-      <br /><br />
+      <br />
+      <br />
 
       <button onClick={createAppointment}>
-        Book Appointment
+        Create Appointment
       </button>
 
       <hr />
@@ -79,14 +93,31 @@ function App() {
       <h2>Appointments</h2>
 
       {appointments.map((appointment) => (
-        <div key={appointment.id}>
+        <div
+          key={appointment.id}
+          style={{
+            border: "1px solid #ccc",
+            padding: "10px",
+            marginBottom: "10px",
+          }}
+        >
           <p>
-            <strong>{appointment.patient_name}</strong>
-            {" → "}
+            <strong>Patient:</strong>{" "}
+            {appointment.patient_name}
+          </p>
+
+          <p>
+            <strong>Doctor:</strong>{" "}
             {appointment.doctor_name}
-            {" → "}
+          </p>
+
+          <p>
+            <strong>Date:</strong>{" "}
             {appointment.appointment_date}
-            {" → "}
+          </p>
+
+          <p>
+            <strong>Status:</strong>{" "}
             {appointment.status}
           </p>
         </div>
